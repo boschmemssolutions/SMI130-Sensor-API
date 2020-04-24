@@ -1,0 +1,30 @@
+#
+# Makefile for Bosch sensor driver.
+#
+
+obj-$(CONFIG_SENSORS_SMI130)	+= smi130_acc_driver.o smi130_acc.o smi130_gyro_driver.o smi130_gyro.o
+
+ifeq ($(CONFIG_SMI130_I2C),y)
+	obj-$(CONFIG_SENSORS_SMI130) += smi130_i2c_driver.o
+else
+	obj-$(CONFIG_SENSORS_SMI130) += smi130_spi_driver.o
+endif
+
+obj-$(CONFIG_BOSCH_DRIVER_LOG_FUNC) += ./../bs_log.o
+ifeq ($(CONFIG_BOSCH_DRIVER_LOG_FUNC),y)
+	EXTRA_CFLAGS += -DBOSCH_DRIVER_LOG_FUNC
+endif
+
+ifeq ($(CONFIG_SENSORS_SMI130_ACC_ENABLE_NEWDATA_INT),y)
+	EXTRA_CFLAGS += -DSENSORS_SMI130_ACC_ENABLE_NEWDATA_INT
+endif
+
+ifeq ($(CONFIG_SENSORS_SMI130_ACC_ENABLE_MOTION),y)
+	EXTRA_CFLAGS += -DSENSORS_SMI130_ACC_ENABLE_MOTION
+endif
+
+ifeq ($(CONFIG_SENSORS_SMI130_GYRO_ENABLE_NEWDATA_INT),y)
+	EXTRA_CFLAGS += -DSENSORS_SMI130_GYRO_ENABLE_NEWDATA_INT
+endif
+
+

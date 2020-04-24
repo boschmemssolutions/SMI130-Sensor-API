@@ -1,0 +1,61 @@
+#Kconfig for Bosch sensors driver.
+
+menuconfig INPUT_SMI130
+	bool "Enable Bosch SMI130 IMU sensor"
+	help
+	 if you say yes here, you get support for Bosch SMI130 driver
+
+choice
+	prompt "Select communication interface"
+	depends on INPUT_SMI130
+	help
+	  Note: SPI and I2C are not supported at the same time, that is to say:
+	  Choose either SPI or I2C to build the driver.
+
+    config SMI130_SPI
+	bool "Enable SPI connection"
+	depends on SPI_MASTER
+    config SMI130_I2C
+	bool "Enable I2C connection"
+	depends on I2C
+endchoice
+
+if INPUT_SMI130
+config BOSCH_DRIVER_LOG_FUNC
+	tristate "Bosch Sensor driver smart log function support"
+	depends on (I2C || SPI_MASTER) && SYSFS
+	help
+	 If you say yes here, you get support for smart log function in Bosch Sensor driver.
+
+config SENSORS_SMI130
+	tristate "SMI130 sensor support"
+	depends on (I2C || SPI_MASTER) && SYSFS
+	help
+	  If you say yes here, you get support for Bosch IMU sensors SMI130
+
+config SENSORS_SMI130_ENABLE_INTERRUPT
+	bool "SMI130 sensor interrupt support"
+	depends on SENSORS_SMI130
+	help
+	 If you say yes here, you get INT2 support for Bosch IMU sensors SMI130_ACC
+
+config SENSORS_SMI130_ACC_ENABLE_NEWDATA_INT
+	bool "enable acc data ready interrupt  "
+	depends on SENSORS_SMI130  &&  SENSORS_SMI130_ENABLE_INTERRUPT
+	help
+	 If you say yes here,  you get INT2 support for acc data ready interrupt 
+
+config SENSORS_SMI130_ACC_ENABLE_MOTION
+	bool "support sensor slope/any motion function"
+	depends on SENSORS_SMI130  &&  SENSORS_SMI130_ENABLE_INTERRUPT
+	help
+	 If you say yes here, you get INT2 support for slope/any motion function
+
+config SENSORS_SMI130_GYRO_ENABLE_NEWDATA_INT
+	bool "enable gyro data ready interrupt  "
+	depends on SENSORS_SMI130  &&  SENSORS_SMI130_ENABLE_INTERRUPT
+	help
+	 If you say yes here,  you get INT1 support for gyro data ready interrupt 	 
+
+endif
+
