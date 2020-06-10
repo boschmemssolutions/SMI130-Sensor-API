@@ -199,77 +199,78 @@ static ssize_t smi130_acc_selftest_store(struct device *dev,
 	struct smi_client_data *client_data = input_get_drvdata(input);
 
 	smi130_acc_soft_rst();
-	smi130_acc_delay(5);
-
+	smi130_acc_delay(200);
 	error = kstrtoul(buf, 10, &data);
 	if (error)
 		return error;
-
 	if (data != 1)
 		return -EINVAL;
 
 	smi130_acc_write_reg(SMI130_ACC_SELFTEST_ADDR, &clear_value,
 	                     SMI130_ACC_GEN_READ_WRITE_LENGTH);
-
 	/* set to 8 G range */
 	if (smi130_acc_set_range(SMI130_ACC_RANGE_8G) < 0)
 		return -EINVAL;
+	/* set bandwidth to 1000Hz  */
 	if (smi130_acc_set_bw(SMI130_ACC_BW_1000HZ)<0)
 		return -EINVAL;
 	smi130_acc_set_selftest_amp(1);
-	/* 1 for z-axis*/
+	/* 1 for x-axis*/
 	smi130_acc_set_selftest_axis(1);
-	smi130_acc_set_selftest_sign(0);
-	smi130_acc_delay(10);
-	smi130_acc_read_x(&value1);
 	smi130_acc_set_selftest_sign(1);
-	smi130_acc_delay(10);
+	smi130_acc_delay(50);
+	smi130_acc_read_x(&value1);
+	smi130_acc_set_selftest_sign(0);
+	smi130_acc_delay(50);
 	smi130_acc_read_x(&value2);
 	diff = value1-value2;
-
 
 	PINFO("diff x is %d,value1 is %d, value2 is %d\n", diff,
 	      value1, value2);
 	test_result_branch = 1;
-
-	if (abs(diff) < 1638)
+	/*x-axis LSB diff should >= (256LSB/g * 800mg/1000 = 205LSB)*/
+	if (abs(diff) < 205)
 		result |= test_result_branch;
-	/* 2 for z-axis*/
+
+	/* 2 for y-axis*/
 	smi130_acc_set_selftest_axis(2);
-	smi130_acc_set_selftest_sign(0);
-	smi130_acc_delay(10);
-	smi130_acc_read_y(&value1);
 	smi130_acc_set_selftest_sign(1);
-	smi130_acc_delay(10);
+	smi130_acc_delay(50);
+	smi130_acc_read_y(&value1);
+	smi130_acc_set_selftest_sign(0);
+	smi130_acc_delay(50);
 	smi130_acc_read_y(&value2);
 	diff = value1-value2;
 	PINFO("diff y is %d,value1 is %d, value2 is %d\n", diff,
 	      value1, value2);
 	test_result_branch = 2;
-
-	if (abs(diff) < 1638)
+	/*y-axis LSB diff should >= (256LSB/g * 800mg/1000 = 205LSB)*/
+	if (abs(diff) < 205)
 		result |= test_result_branch;
+
+	smi130_acc_delay(50);	
 	/* 3 for z-axis*/
 	smi130_acc_set_selftest_axis(3);
-	smi130_acc_set_selftest_sign(0);
-	smi130_acc_delay(10);
-	smi130_acc_read_z(&value1);
 	smi130_acc_set_selftest_sign(1);
-	smi130_acc_delay(10);
+	smi130_acc_delay(50);
+	smi130_acc_read_z(&value1);
+	smi130_acc_set_selftest_sign(0);
+	smi130_acc_delay(50);
 	smi130_acc_read_z(&value2);
 	diff = value1-value2;
 
 	PINFO("diff z is %d,value1 is %d, value2 is %d\n", diff,
 	      value1, value2);
 	test_result_branch = 4;
-	if (abs(diff) < 819)
+	/*z-axis LSB diff should >= (256LSB/g * 400mg/1000 = 103LSB)*/
+	if (abs(diff) < 103)
 		result |= test_result_branch;
 
 	atomic_set(&client_data->selftest_result, (uint32_t)result);
 
 	smi130_acc_soft_rst();
-	smi130_acc_delay(5);
-	PINFO("self test finished\n");
+	smi130_acc_delay(200);
+	PINFO("self test result:%ld\n",result);
 
 	return count;
 }
@@ -830,8 +831,7 @@ static ssize_t smi130_acc_offset_y_show(struct device *dev,
 {
 	uint8_t data = 0;
 
-	if (smi130_acc_set_offset(SMI130_ACC_Y_AXIS, (unsigned
-	                          char)data) < 0)
+	if (smi130_acc_get_offset(SMI130_ACC_Y_AXIS, &data) < 0)
 		return snprintf(buf, 48, "Read error\n");
 
 	return snprintf(buf, 16, "%d\n", data);
@@ -1317,8 +1317,10 @@ int32_t smi130_acc_probe(struct smi_client_data *client_data, struct device *dev
 	client_data->time_odr = 4000000;/*default bandwidth 125HZ*/
 	client_data->smi_acc_mode_enabled = 0;
 	/*soft reset*/
+	smi_delay(5);
 	err = smi130_acc_soft_rst();
-	smi_delay(30);
+	/*200ms delay is recommended after soft reset*/
+	smi_delay(200);
 	if (err<0)
 		dev_err(client_data->dev, "Failed soft reset, er=%d", err);
 

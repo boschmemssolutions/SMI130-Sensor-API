@@ -128,7 +128,7 @@
 #endif
 
 
-#define DRIVER_VERSION "0.0.3"
+#define DRIVER_VERSION "0.1.0"
 
 
 

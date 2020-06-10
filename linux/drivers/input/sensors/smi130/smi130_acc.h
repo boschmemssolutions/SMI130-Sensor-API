@@ -948,7 +948,7 @@ SMI130_ACC_INTR_SOURCE_ADDR
 /**< It refers 10bit accel resolution*/
 #define SMI130_ACC_12_BIT_SHIFT		(0xF0)
 /**< It refers 12bit accel resolution*/
-#define BANDWIDTH_DEFINE		(0xFA)
+#define BANDWIDTH_DEFINE		(0xFB)
 /**< Chip id set for accel bandwidth define*/
 
 /****************************************************/

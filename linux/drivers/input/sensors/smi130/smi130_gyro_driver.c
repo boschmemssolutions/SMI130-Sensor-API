@@ -687,13 +687,13 @@ int32_t smi_gyro_probe(struct smi_gyro_client_data *client_data, struct device *
 	smi130_gyro_delay(5);
 	PINFO("gyro soft reset");
 	err = smi_gyro_reset(client_data);
-	smi130_gyro_delay(30);
+	/*200ms delay is recommended after soft reset*/
+	smi130_gyro_delay(200);
 	if (err < 0) {
 		PERR("error soft reset!\n");
 		err = -EINVAL;
 		goto exit_err_clean;
 	}
-	smi130_gyro_delay(30);
 
 	/* input device init */
 	err = smi_gyro_input_init(client_data);
