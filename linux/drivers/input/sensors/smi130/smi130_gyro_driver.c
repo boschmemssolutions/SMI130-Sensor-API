@@ -98,8 +98,8 @@ static struct workqueue_struct *reportdata_wq;
 static uint64_t smi130_gyro_get_alarm_timestamp(void)
 {
 	uint64_t ts_ap;
-	struct timespec tmp_time;
-	get_monotonic_boottime(&tmp_time);
+	struct timespec64 tmp_time; //adapt to Kernel v5.15
+	ktime_get_boottime_ts64(&tmp_time); //adapt to Kernel v5.15
 	ts_ap = (uint64_t)tmp_time.tv_sec * 1000000000 + tmp_time.tv_nsec;
 	return ts_ap;
 }
@@ -618,8 +618,8 @@ static void smi130_gyro_irq_work_func(struct work_struct *work)
 	struct smi_gyro_client_data *client_data = container_of(work,
 	                struct smi_gyro_client_data, irq_work);
 	struct smi130_gyro_data_t gyro_data;
-	struct timespec ts;
-	ts = ns_to_timespec(client_data->timestamp);
+	struct timespec64 ts; //adapt to Kernel v5.15
+	ts = ns_to_timespec64(client_data->timestamp); //adapt to Kernel v5.15
 	SMI_GYRO_CALL_API(get_dataXYZ)(&gyro_data);
 
 	input_event(client_data->input, INPUT_EVENT_TYPE, INPUT_EVENT_TIME,
